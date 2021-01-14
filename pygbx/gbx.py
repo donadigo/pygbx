@@ -141,19 +141,19 @@ class Gbx(object):
             self.root_parser.read_string()
             self.__read_sub_folder()
 
-    """Finds a raw chunk ID in the file, skipping through any data that does not match the chunk ID provided.
-
-    It is not guaranteed that the chunk found is indeed the desired data, as it could be other unrelated
-    chunk that bytes happened to form the chunk ID provided.
-
-    Args:
-        chunk_id (int): the chunk ID to search for
-
-    Returns:
-        ByteParser with the current position set right after the chunk ID, or None
-        if no specified chunk ID was found
-    """
     def find_raw_chunk_id(self, chunk_id):
+        """Finds a raw chunk ID in the file, skipping through any data that does not match the chunk ID provided.
+
+        It is not guaranteed that the chunk found is indeed the desired data, as it could be other unrelated
+        chunk that bytes happened to form the chunk ID provided.
+
+        Args:
+            chunk_id (int): the chunk ID to search for
+
+        Returns:
+            ByteParser with the current position set right after the chunk ID, or None
+            if no specified chunk ID was found
+        """
         bp = ByteReader(self.data[:])
         for i in range(len(self.data) - 4):
             bp.pos = i
