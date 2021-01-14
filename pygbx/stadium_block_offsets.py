@@ -431,9 +431,3 @@ STADIUM_BLOCK_OFFSETS = {
     'StadiumDecoTowerD': [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 3, 0], [0, 4, 0], [0, 5, 0], [0, 6, 0], [0, 7, 0], [0, 8, 0], [0, 9, 0]],
     'StadiumDecoTowerC': [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 3, 0], [0, 4, 0], [0, 5, 0], [0, 6, 0], [0, 7, 0], [0, 8, 0], [0, 9, 0]]
 }
-
-DYNAMIC_GROUND_OFFSETS = {
-    'StadiumFabricPillarCornerOut': [[0, 0, 0]],
-    'StadiumFabricPillarCornerInAir': [[0, 0, 1], [1, 0, 0], [1, 0, 1]],
-    'StadiumFabricPillarAir': [[0, 0, 0]]
-}
