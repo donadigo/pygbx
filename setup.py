@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'pygbx',
   packages = ['pygbx'],
-  version = '0.1',
+  version = '0.2',
   license='GPL3',
   description = 'A Python library to parse GBX files',
   author = 'Adam Bieńkowski',              
