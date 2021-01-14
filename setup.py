@@ -8,7 +8,7 @@ setup(
   author = 'Adam Bieńkowski',              
   author_email = 'donadigos159@gmail.com',
   url = 'https://github.com/donadigo/pygbx',
-  download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',
+  download_url = 'https://github.com/donadigo/pygbx/archive/0.1.zip',
   keywords = ['GBX', 'parser', 'TrackMania'],
   install_requires=[           
           'python-lzo',
