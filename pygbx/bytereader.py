@@ -221,6 +221,8 @@ class ByteReader(object):
                 return 'Valley'
             elif inp == 12:
                 return 'Canyon'
+            elif inp == 13:
+                return 'Lagoon'
             elif inp == 17:
                 return 'TMCommon'
             elif inp == 202:
