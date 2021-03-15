@@ -1,4 +1,3 @@
-from pygbx.stadium_blocks import STADIUM_BLOCKS
 import math
 
 class CGameHeader(object):
