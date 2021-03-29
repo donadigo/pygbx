@@ -399,6 +399,13 @@ class Gbx(object):
                 # if isinstance(self.__current_class, headers.CGameChallenge):
                     # self.__current_class.password_hash = m.hexdigest()
                     # self.__current_class.password_crc = bp.read_uint32()
+            elif cid == 0x03043017:
+                num_cps = bp.read_uint32()
+                for _ in range(num_cps):
+                    bp.read_uint32()
+                    bp.read_uint32()
+                    bp.read_uint32()
+
             elif cid == 0x0304301F or cid == 0x2400301F:
                 game_class.map_uid = bp.read_string_lookback()
                 game_class.environment = bp.read_string_lookback()
@@ -587,7 +594,11 @@ class Gbx(object):
             elif cid == 0x03093002 or cid == 0x2403F002:
                 map_gbx_size = bp.read_uint32()
                 data = bytes(bp.read(map_gbx_size))
-                game_class.track = Gbx(data)            
+                try:
+                    game_class.track = Gbx(data)
+                except Exception as e:
+                    logging.error(f'Failed to parse map data: {e}')
+
             elif cid == 0x03093007:
                 bp.skip(4)
             elif cid == 0x03093014 or cid == 0x2403F014:
