@@ -697,30 +697,31 @@ class Gbx(object):
                     bp.skip(4)
 
                 game_class.events_duration = bp.read_uint32()
-                bp.skip(4)
+                if game_class.events_duration != 0:
+                    bp.skip(4)
 
-                num_control_names = bp.read_uint32()
-                game_class.control_names = []
-                for _ in range(num_control_names):
-                    name = bp.read_string_lookback()
-                    if name != '':
-                        game_class.control_names.append(name)
+                    num_control_names = bp.read_uint32()
+                    game_class.control_names = []
+                    for _ in range(num_control_names):
+                        name = bp.read_string_lookback()
+                        if name != '':
+                            game_class.control_names.append(name)
                     
-                if len(game_class.control_names) == 0:
-                    continue
+                    if len(game_class.control_names) == 0:
+                        continue
 
-                num_control_entries = bp.read_uint32()
-                bp.skip(4)
-                for _ in range(num_control_entries):
-                    time = bp.read_uint32() - 100000
-                    name = game_class.control_names[bp.read_byte()]
-                    entry = headers.ControlEntry(time, name, bp.read_uint16(), bp.read_uint16()) 
-                    game_class.control_entries.append(entry)
+                    num_control_entries = bp.read_uint32()
+                    bp.skip(4)
+                    for _ in range(num_control_entries):
+                        time = bp.read_uint32() - 100000
+                        name = game_class.control_names[bp.read_byte()]
+                        entry = headers.ControlEntry(time, name, bp.read_uint16(), bp.read_uint16()) 
+                        game_class.control_entries.append(entry)
                 
-                game_class.game_version = bp.read_string()
-                bp.skip(3 * 4)
-                bp.read_string()
-                bp.skip(4)
+                    game_class.game_version = bp.read_string()
+                    bp.skip(3 * 4)
+                    bp.read_string()
+                    bp.skip(4)
             elif cid == 0x309201c:
                 bp.skip(32)
             elif cid == 0x03093004 or cid == 0x2403f004:
