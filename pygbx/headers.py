@@ -168,6 +168,7 @@ class CGameCtnGhost(CGameGhost):
         self.game_version = ''
         self.control_names = []
         self.events_duration = 0
+        self.is_maniaplanet = False
         super(CGameCtnGhost, self).__init__(id)
 
 class ControlEntry(object):

@@ -2,6 +2,7 @@ import logging
 import struct
 from io import IOBase
 from pygbx.headers import Vector3
+from os import SEEK_END
 
 class PositionInfo(object):
     """
@@ -46,8 +47,12 @@ class ByteReader(object):
         self.data = obj
         if isinstance(obj, IOBase):
             self.get_bytes = self.__get_bytes_file
+            self.data.seek(0, SEEK_END)
+            self.size = self.data.tell()
+            self.data.seek(0)
         else:
             self.get_bytes = self.__get_bytes_generic
+            self.size = len(self.data)
 
         self.pos = 0
         self.seen_loopback = False
@@ -92,6 +97,12 @@ class ByteReader(object):
         except Exception as e:
             logging.error(e)
             return 0
+
+    def size(self):
+        if isinstance(self.data, IOBase):
+            return self.data.tell()
+        else:
+            return len(self.data)
 
     def __get_bytes_file(self, num_bytes):
         self.data.seek(self.pos)
