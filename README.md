@@ -23,7 +23,7 @@ print(f'Environment: {challenge.environment}')
 ```
 Map Name: A01-Race
 Map Author: Nadeo
-Enviornment: Stadium
+Environment: Stadium
 ```
 
 ## Enumerate blocks present in a Challenge map:
