@@ -5,22 +5,19 @@ from logging import error
 class LZO(object):
     def __init__(self):
         # Load libs here once in case someone wants to execute the compression methods in batch mode
-        self._lib_ext = ''
         if osname == 'nt':
             self._lib_ext = '.dll'
         elif osname == 'posix':
             self._lib_ext = '.so'
         else:
-            self._lib_ext = False
-        if self._lib_ext:
-            self._decompress_lib_path = path.join(getcwd(), 'pygbx', 'lzo', 'libs',
-                                                  f'lzo1x_decompress_safe{self._lib_ext}')
-            try:
-                self._lzo_lib = CDLL(self._decompress_lib_path)
-            except Exception as e:
-                raise Exception(f'lzo decompression library was not successfully loaded: {e}')
-        else:
             raise Exception(f'your system cannot load the lzo libs. required: windows/posix, given: {osname}')
+
+        self._decompress_lib_path = path.join(getcwd(), 'pygbx', 'lzo', 'libs',
+                                              f'lzo1x_decompress_safe{self._lib_ext}')
+        try:
+            self._lzo_lib = CDLL(self._decompress_lib_path)
+        except Exception as e:
+            raise Exception(f'lzo decompression library was not successfully loaded: {e}')
 
     def lzo1x_decompress_safe(self, data, uncompressed_size):
         return self._lzo1x_decompress_safe(data, uncompressed_size)
