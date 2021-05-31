@@ -1,7 +1,7 @@
 import logging
 from enum import IntEnum
 
-import lzo
+from pygbx.lzo import LZO
 import zlib
 
 import pygbx.headers as headers
@@ -90,6 +90,8 @@ class Gbx(object):
         self.__current_waypoint = None
         self.__replay_header_info = {}
 
+        self.lzo = LZO()
+
         self.root_parser.skip(3)
         if self.version >= 4:
             self.root_parser.skip(1)
@@ -130,7 +132,7 @@ class Gbx(object):
         data_size = self.root_parser.read_uint32()
         compressed_data_size = self.root_parser.read_uint32()
         cdata = self.root_parser.read(compressed_data_size)
-        self.data = bytearray(lzo.decompress(cdata, False, data_size))
+        self.data = bytearray(self.lzo.lzo1x_decompress_safe(cdata, data_size))
 
         bp = ByteReader(self.data)
         self._read_node(self.class_id, -1, bp)
