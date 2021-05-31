@@ -12,7 +12,7 @@ class LZO(object):
         else:
             raise Exception(f'your system cannot load the lzo libs. required: windows/posix, given: {osname}')
 
-        self._decompress_lib_path = path.join(getcwd(), 'pygbx', 'lzo', 'libs',
+        self._decompress_lib_path = path.join(path.dirname(path.abspath(__file__)), 'lzo', 'libs',
                                               f'lzo1x_decompress_safe{self._lib_ext}')
         try:
             self._lzo_lib = CDLL(self._decompress_lib_path)

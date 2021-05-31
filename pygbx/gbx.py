@@ -134,6 +134,9 @@ class Gbx(object):
         cdata = self.root_parser.read(compressed_data_size)
         self.data = bytearray(self.lzo.lzo1x_decompress_safe(cdata, data_size))
 
+        if not self.data:
+            raise GbxLoadError(f'data decompression has failed')
+
         bp = ByteReader(self.data)
         self._read_node(self.class_id, -1, bp)
 
