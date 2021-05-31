@@ -14,7 +14,7 @@ class LZO(object):
             self._lib_ext = False
         if self._lib_ext:
             self._decompress_lib_path = path.join(getcwd(), 'pygbx', 'lzo', 'libs',
-                                                  f'lzo2{self._lib_ext}')
+                                                  f'lzo1x_decompress_safe{self._lib_ext}')
             try:
                 self._lzo_lib = CDLL(self._decompress_lib_path)
             except Exception as e:
