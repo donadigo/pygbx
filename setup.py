@@ -10,9 +10,6 @@ setup(
   url = 'https://github.com/donadigo/pygbx',
   download_url = 'https://github.com/donadigo/pygbx/archive/0.1.zip',
   keywords = ['GBX', 'parser', 'TrackMania'],
-  install_requires=[           
-          'python-lzo',
-  ],
   classifiers=[
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
@@ -22,5 +19,9 @@ setup(
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
   ],
+  package_dir={'pygbx': 'pygbx'},
+  package_data={'pygbx': ['lzo/libs/lzo1x.*']},
 )
