@@ -23,7 +23,7 @@ class GbxType(IntEnum):
     REPLAY_RECORD_OLD = 0x02407E000
     GAME_GHOST = 0x0303F005
     CTN_GHOST = 0x03092000
-    CTN_GHOST_OLD = 0x2401B000 
+    CTN_GHOST_OLD = 0x2401B000
     CTN_COLLECTOR = 0x0301A000
     CTN_OBJECT_INFO = 0x0301C000
     CTN_DECORATION = 0x03038000
@@ -129,10 +129,10 @@ class Gbx(object):
         self.root_parser.push_info()
         self.positions['data_size'] = self.root_parser.pop_info()
 
-        data_size = self.root_parser.read_uint32()
-        compressed_data_size = self.root_parser.read_uint32()
-        cdata = self.root_parser.read(compressed_data_size)
-        self.data = bytearray(self.lzo.lzo1x_decompress_safe(cdata, data_size))
+        uncompressed_size = self.root_parser.read_uint32()
+        compressed_size = self.root_parser.read_uint32()
+        compressed_data = self.root_parser.read(compressed_size)
+        self.data = self.lzo.decompress(compressed_data, uncompressed_size)
 
         if not self.data:
             raise GbxLoadError(f'data decompression has failed')

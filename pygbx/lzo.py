@@ -1,93 +1,130 @@
 import ctypes
 from os import path, name as osname
-from ctypes import CDLL, c_uint32, byref
+from ctypes import CDLL, c_uint32, byref, c_char_p, POINTER, sizeof, c_void_p
 from logging import error
 
 
-class LZO(object):
-    """This class contains stand alone methods of the LZO library. It calls an external library file.
+class LZO:
+    """This class contains stand alone methods of the LZO library. It calls an external library file and will run in C.
 
-    Available methods:
-        lzo1x_1_compress
-        lzo1x_999_compress (best compression)
-        lzo1x_decompress_safe (use this for decompression)
+    Usage
+        Create an instance of this class and use it with obj.decompress(data, uncompressed_size) or obj.compress(data).
+        It will always return data or False on failure. The instance is reusable.
 
-    More functions build into the library that haven't been implemented yet:
-        lzo1x_1_11_compress
-        lzo1x_1_12_compress
-        lzo1x_1_15_compress
-        lzo1x_999_compress_dict
-        lzo1x_999_compress_internal
-        lzo1x_999_compress_level
-        lzo1x_decompress
-        lzo1x_decompress_dict_safe
-        lzo1x_optimize
+    Availability
+        This library should work on Windows and Linux both 32 and 64 bit. If you encounter issues
+        please submit an issue
+
+    Extra info
+        When decompressing, the uncompressed_size argument is known before the data is uncompressed.
+        It is written inside of GBX data and has to be retrieved from there.
+
+        Internal LZO functions that are used
+            lzo1x_999_compress
+            lzo1x_decompress_safe
+
+        Other internal functions that are called from the above
+            lzo1x_999_compress_internal
+            lzo1x_999_compress_level
+
+        lzo1x_999_compress
+            This is the best function for compressing data in terms of file size, but also one of the slowest. The LZO
+            FAQ itself says however it should be used when generating pre-compressed data (meaning stuff like
+            Replay/Challenge files). The decompression speed is not affected by whatever compression function was used.
+
+        lzo1x_decompress_safe
+            Extremely fast decompression algorithm. It was designed for run time applications, such as it was in the
+            game Trackmania. Its name has the postfix _safe because it can never crash (from LZO FAQ). However there is
+            no guarantee that the returned data has its integrity preserved. LZO offers crc32 (and adler32) to check the
+            integrity, but since GBX data doesn't seem to have the checksum written anywhere, there was also no real
+            point of integrating the lzo_crc32 into this library. If you know where the checksum might be hidden please
+            write us back.
+
+        Speed
+            The lzo1x_decompress_safe function is extremely fast. Benchmarking 100,000 iterations of decompressing a
+            TMNF replay file (36538 bytes in size) took approximately 1.08 seconds. The uncompressed size was 38595
+
+            The lzo1x_999_compress function is slow. Benchmarking 1000 iterations of uncompressed data from above with
+            a size of 38595 bytes took approximately 2.7 seconds (which still is only ~0.003 seconds for a GBX Replay)
+
+        Comparison to compression of TMNF
+            A random set of 14000 replays were analyzed in terms of their compressed to decompressed ratio for the
+            internal function the game uses vs the lzo1x_999_compress function this library uses.
+            On average, the compression factor of replay files in TMNF are at about 94.33%, where as compressing that
+            data with lzo1x_999_compress resulted in a compression rate of about 93.60%.
+
+            Tip: You can if you want uncompress the data in your GBX data and re-compress it with this
+            lzo1x_999_compress method to save a little bit of space, it is recognized and acceptable by the game
     """
+
     def __init__(self):
-        # Load libs here once in case someone wants to execute the compression methods in batch mode
+        """Loads library upon object creation once"""
+
+        # Check for architecture size
+        self.is64 = sizeof(c_void_p) >> 3
+
+        # Check for architecture (Windows/Linux supported)
         if osname == 'nt':
             self.__lib_ext = '.dll'
         elif osname == 'posix':
             self.__lib_ext = '.so'
         else:
-            raise Exception(f'your system cannot load the lzo libs. required: windows/posix, given: {osname}')
+            raise Exception(f'Your system cannot load the LZO libs. Required: Windows/Linux, given: {osname}')
 
         self.__lzo1x_lib_path = path.join(path.dirname(path.abspath(__file__)), 'lzo', 'libs',
-                                          f'lzo1x{self.__lib_ext}')
+                                          f'lzo1x_{"64" if self.is64 else "32"}{self.__lib_ext}')
 
         try:
             self.__lzo1x_lib = CDLL(self.__lzo1x_lib_path)
         except Exception as e:
-            raise Exception(f'lzo decompression library could not be successfully loaded: {e}')
+            raise Exception(f'LZO library could not be loaded: {e}')
 
-    def lzo1x_decompress_safe(self, data, uncompressed_size):
+        # Specify arguments and response types
+        self.__lzo1x_lib.lzo1x_decompress_safe.restype = c_uint32
+        self.__lzo1x_lib.lzo1x_decompress_safe.argtypes = [c_char_p, c_uint32, c_char_p,
+                                                           POINTER(c_uint32)]
+
+        self.__lzo1x_lib.lzo1x_999_compress.restype = c_uint32
+        self.__lzo1x_lib.lzo1x_999_compress.argtypes = [c_char_p, c_uint32, c_char_p,
+                                                        POINTER(c_uint32), ctypes.c_void_p]
+
+    def decompress(self, data, uncompressed_size):
         return self.__lzo1x_decompress_safe(data, uncompressed_size)
 
-    def lzo1x_1_compress(self, data, uncompressed_size):
-        return self.__lzo1x_1_compress(data, uncompressed_size)
-
-    def lzo1x_999_compress(self, data, uncompressed_size):
-        return self.__lzo1x_999_compress(data, uncompressed_size)
+    def compress(self, data):
+        return self.__lzo1x_999_compress(data)
 
     def __lzo1x_decompress_safe(self, data, uncompressed_size):
         if not isinstance(data, bytes):
             try:
                 data = bytes(data)
             except Exception as e:
-                error(f'Could not turn data into bytes data type: {e}')
+                error(f'Could not turn data into type bytes: {e}')
                 return False
         if not isinstance(uncompressed_size, int):
             error(f'uncompressed_size must be of data type int. {type(uncompressed_size)} was given')
             return False
 
-        # compressed data is here
-        in_buffer = data
         # decompressed data goes here
         out_buffer = bytes(uncompressed_size)
 
         # C unsigned int compressed_size
-        compressed_size = c_uint32(len(in_buffer))
+        compressed_size = c_uint32(len(data))
 
-        # C unsigned int uncompressed_size
-        uncompressed_size = c_uint32(uncompressed_size)
-
-        # This is is necessary because uncompressed_size will be overwritten by the decompress function
-        uncompressed_size_original = uncompressed_size.value
-
-        # ! bytes_written is a pointer (C unsigned int* bytes_written) that points to uncompressed_size, which holds
-        # (currently) the output length that we should see if decompression is successful. however the C function
-        # sets the value in uncompressed_size to 0 at the start of the functions. before it sets it 0, it saves the
-        # value into another internal value. the uncompressed_size value will then be used as a variable to store how
-        # many bytes were written during decompression, which is why this pointer below that points to uncompressed_size
-        # is called bytes_written.
-        bytes_written = byref(uncompressed_size)
+        # Pointer to uncompressed_size. The function takes in a pointer to uncompressed_size and uses it internally
+        # to store some internal temporary value which then holds the uncompressed_size and is used for something else.
+        # Afterwards the internal function sets our outside uncompressed_size to 0, and as the decompression process
+        # progresses, it writes into it the number of bytes that were written (hence the name bytes_written for the
+        # pointer). After the internal function returns, it will have set our outside uncompressed_size to the bytes
+        # that were actually written, so uncompressed_size should become the same value again, if no error has occurred
+        bytes_written = c_uint32(uncompressed_size)
 
         try:
-            self.__lzo1x_lib.lzo1x_decompress_safe(in_buffer, compressed_size,
-                                                   out_buffer, bytes_written)
-            # we can now compare uncompressed_size (how many bytes were written during decompression) with
-            # the uncompressed_size_original variable
-            if uncompressed_size.value != uncompressed_size_original:
+            if self.__lzo1x_lib.lzo1x_decompress_safe(data, compressed_size, out_buffer, byref(bytes_written)):
+                return False
+
+            # check if the bytes that were written match out_buffer size we have originally allocated
+            if bytes_written.value != len(out_buffer):
                 return False
             else:
                 return out_buffer
@@ -95,62 +132,29 @@ class LZO(object):
             error(e)
             return False
 
-    def __lzo1x_1_compress(self, data, uncompressed_size):
+    def __lzo1x_999_compress(self, data):
         if not isinstance(data, bytes):
             try:
                 data = bytes(data)
             except Exception as e:
                 error(f'Could not turn data into bytes data type: {e}')
                 return False
-        if not isinstance(uncompressed_size, int):
-            error(f'uncompressed_size must be of data type int. {type(uncompressed_size)} was given')
-            return False
 
-        in_buffer = data
-        # How big should these even be?
-        out_buffer = bytes(len(in_buffer)*2)
+        # Compressed data ends up here. According to LZO FAQ, the size of this buffer is calculated with this formula:
+        # out_size = in_size + (in_size / 16) + 64 + 3
+        # These are worst case scenario expansions (~106% of in_size)
+        out_buffer = bytes(len(data) + (int(len(data) / 16)) + 67)
 
-        workmem = bytes(65535)
-
-        uncompressed_size = ctypes.c_uint32(uncompressed_size)
-        compressed_size = ctypes.c_uint32(0)
-
-        bytes_written = ctypes.byref(compressed_size)
+        work_memory = bytes(524288)
+        uncompressed_size = c_uint32(len(data))
+        bytes_written = c_uint32(0)
 
         try:
-            self.__lzo1x_lib.lzo1x_1_compress(in_buffer, uncompressed_size, out_buffer,
-                                              bytes_written, workmem)
-            return out_buffer[0:compressed_size.value]
-        except Exception as e:
-            error(e)
-        return False
-
-    def __lzo1x_999_compress(self, data, uncompressed_size):
-        if not isinstance(data, bytes):
-            try:
-                data = bytes(data)
-            except Exception as e:
-                error(f'Could not turn data into bytes data type: {e}')
+            if self.__lzo1x_lib.lzo1x_999_compress(
+                    data, uncompressed_size, out_buffer, byref(bytes_written), work_memory) != 0:
                 return False
-        if not isinstance(uncompressed_size, int):
-            error(f'uncompressed_size must be of data type int. {type(uncompressed_size)} was given')
-            return False
 
-        in_buffer = data
-        # How big should these even be?
-        out_buffer = bytes(len(in_buffer)*2)
-
-        workmem = bytes(524288)
-
-        uncompressed_size = ctypes.c_uint32(uncompressed_size)
-        compressed_size = ctypes.c_uint32(0)
-
-        bytes_written = ctypes.byref(compressed_size)
-
-        try:
-            self.__lzo1x_lib.lzo1x_999_compress(in_buffer, uncompressed_size, out_buffer,
-                                                bytes_written, workmem)
-            return out_buffer[0:compressed_size.value]
+            return out_buffer[0:bytes_written.value]
         except Exception as e:
             error(e)
-        return False
+            return False
