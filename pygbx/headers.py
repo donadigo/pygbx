@@ -179,6 +179,14 @@ class ControlEntry(object):
         self.enabled = enabled
         self.flags = flags
 
+    """Copies the ControlEntry and all of its properties.
+    
+    Returns:
+        the copied ControlEntry 
+    """
+    def copy(self):
+        return ControlEntry(self.time, self.event_name, self.enabled, self.flags)
+
 class GhostSampleRecord(object):
     """A header that contains a single sample out of the ghost data such as position, rotation of the car and more."""
     BLOCK_SIZE_XZ = 32
