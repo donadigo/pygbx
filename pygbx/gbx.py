@@ -719,6 +719,8 @@ class Gbx(object):
         if cid == 0x03092025:
             game_class.is_maniaplanet = True
             bp.skip(4)
+        elif cid == 0x03f00dff or cid == 0x3f00dfa:
+            bp.skip(1)
 
         game_class.events_duration = bp.read_uint32()
         if game_class.events_duration != 0:
@@ -742,6 +744,9 @@ class Gbx(object):
                 entry = headers.ControlEntry(time, name, bp.read_uint16(), bp.read_uint16()) 
                 game_class.control_entries.append(entry)
             
+            if cid == 0x03f00dff or cid == 0x3f00dfa:
+                game_class.game_version = "TmNations"
+                return
             game_class.game_version = bp.read_string()
             bp.skip(3 * 4)
             bp.read_string()
