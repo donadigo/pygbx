@@ -2,15 +2,15 @@ from distutils.core import setup
 setup(
   name = 'pygbx',
   packages = ['pygbx'],
-  version = '0.2',
+  version = '0.3',
   license='GPL3',
   description = 'A Python library to parse GBX files',
   author = 'Adam Bieńkowski',              
   author_email = 'donadigos159@gmail.com',
   url = 'https://github.com/donadigo/pygbx',
-  download_url = 'https://github.com/donadigo/pygbx/archive/0.1.zip',
+  download_url = 'https://github.com/donadigo/pygbx/archive/0.3.zip',
   keywords = ['GBX', 'parser', 'TrackMania'],
-  install_requires=[           
+  install_requires=[
           'python-lzo',
   ],
   classifiers=[
