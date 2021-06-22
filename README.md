@@ -16,14 +16,14 @@ if not challenge:
 
 print(f'Map Name: {challenge.map_name}')
 print(f'Map Author: {challenge.map_author}')
-print(f'Enviornment: {challenge.environment}')
+print(f'Environment: {challenge.environment}')
 ```
 
 ### Output:
 ```
 Map Name: A01-Race
 Map Author: Nadeo
-Enviornment: Stadium
+Environment: Stadium
 ```
 
 ## Enumerate blocks present in a Challenge map:
