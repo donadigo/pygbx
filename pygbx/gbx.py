@@ -83,11 +83,9 @@ class Gbx(object):
         try:
             self.magic.decode('utf-8')
         except:
-            self.close()
             raise GbxLoadError(f'obj is not a valid Gbx data: can not decode unicode')
 
         if self.magic.decode('utf-8') != 'GBX':
-            self.close()
             raise GbxLoadError(f'obj is not a valid Gbx data: magic string is incorrect')
         self.version = self.root_parser.read(2, 'H')
         self.classes = {}
@@ -141,6 +139,12 @@ class Gbx(object):
 
         bp = ByteReader(self.data)
         self._read_node(self.class_id, -1, bp)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        self.close()
 
     """Closes the current file connection."""
     def close(self):
