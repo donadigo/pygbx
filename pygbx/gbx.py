@@ -79,9 +79,15 @@ class Gbx(object):
         else:
             self.root_parser = ByteReader(obj)
 
-        self.magic = self.root_parser.read(3, '3s')
-        if self.magic.decode('utf-8') != 'GBX':
+        magic = self.root_parser.read(3, '3s')
+        try:
+            magic = magic.decode('utf-8')
+        except:
+            raise GbxLoadError(f'obj is not a valid Gbx data: can not decode unicode')
+
+        if magic != 'GBX':
             raise GbxLoadError(f'obj is not a valid Gbx data: magic string is incorrect')
+            
         self.version = self.root_parser.read(2, 'H')
         self.classes = {}
         self.root_classes = {}
@@ -125,7 +131,7 @@ class Gbx(object):
                     self.root_parser.skip(4)
 
         self.root_parser.push_info()
-        self.positions['data_size'] = self.root_parser.pop_info()
+        self.positions["data_size"] = self.root_parser.pop_info()
 
         data_size = self.root_parser.read_uint32()
         compressed_data_size = self.root_parser.read_uint32()
@@ -134,6 +140,17 @@ class Gbx(object):
 
         bp = ByteReader(self.data)
         self._read_node(self.class_id, -1, bp)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        self.close()
+
+    """Closes the current file connection."""
+    def close(self):
+        if self.f:
+            self.f.close()
 
     def __read_sub_folder(self):
         num_sub_folders = self.root_parser.read_uint32()
