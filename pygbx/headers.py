@@ -1,5 +1,6 @@
 import math
 
+
 class CGameHeader(object):
     """A generic header class that contains it's class ID."""
     def __init__(self, id):
@@ -50,6 +51,7 @@ class MapBlock(object):
             'Flags: {}\n'
         ).format(self.name, self.rotation, self.position.as_array(), bin(self.flags))
 
+
 class Vector3(object):
     """The Vector3 class represents a 3D vector, usually read directly from the GBX file."""
     def __init__(self, x=0, y=0, z=0):
@@ -80,7 +82,7 @@ class Vector3(object):
 
     def as_array(self):
         """Returns the vector as a list.
-        
+
         Returns:
             the vector as a list made of 3 elements
         """
@@ -168,8 +170,13 @@ class CGameCtnGhost(CGameGhost):
         self.game_version = ''
         self.control_names = []
         self.events_duration = 0
+        self.exe_checksum = 0
+        self.os_kind = 0
+        self.cpu_kind = 0
+        self.race_settings_xml = None
         self.is_maniaplanet = False
         super(CGameCtnGhost, self).__init__(id)
+
 
 class ControlEntry(object):
     """A header that contains data related to the control entries contained within the CGameCtnGhost class."""
@@ -180,12 +187,13 @@ class ControlEntry(object):
         self.flags = flags
 
     """Copies the ControlEntry and all of its properties.
-    
+
     Returns:
-        the copied ControlEntry 
+        the copied ControlEntry
     """
     def copy(self):
         return ControlEntry(self.time, self.event_name, self.enabled, self.flags)
+
 
 class GhostSampleRecord(object):
     """A header that contains a single sample out of the ghost data such as position, rotation of the car and more."""

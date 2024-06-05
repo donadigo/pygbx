@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygbx"
+version = "0.3.1"
+authors = [
+  { name="Adam Bieńkowski", email="donadigo@gmail.com" },
+]
+description = "A Python library to parse GBX files"
+readme = "README.md"
+keywords = ["GBX", "parser", "TrackMania"]
+classifiers = [
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.4",
+  "Programming Language :: Python :: 3.5",
+  "Programming Language :: Python :: 3.6"
+]
+
+dependencies = [
+  "python-lzo@git+https://github.com/jd-boyd/python-lzo"
+]
+
+[project.urls]
+Homepage = "https://github.com/donadigo/pygbx"
+Issues = "https://github.com/donadigo/pygbx/issues"
